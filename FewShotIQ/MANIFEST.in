@@ -1,0 +1,2 @@
+include FewShotIQ/data/*
+recursive-include FewShotIQ/data *

@@ -1,0 +1,12 @@
+Metadata-Version: 2.1
+Name: FewShotIQ
+Version: 0.1.0
+Summary: FewShotIQ: Few-Shot Image Quality Inspection and Quantification
+Home-page: https://github.com/yourusername/FewShotIQ
+Author: Fadel M Megahed, Ying-Ju Chen, L. Allison Jones-Farmer, Bianca Maria Colosimo, Hongyue Sun, Inez Zwetsloot, Marco Luigi Giuseppe Grasso, Sven Knoth
+Author-email: fmegahed@miamioh.edu, ychen4@udayton.edu, farmerl2@miamioh.edu, biancamaria.colosimo@polimi.it, HongyueSun@uga.edu, i.m.zwetsloot@uva.nl, marcoluigi.grasso@polimi.it, knoth@hsu-hh.de
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.7
+License-File: LICENSE
