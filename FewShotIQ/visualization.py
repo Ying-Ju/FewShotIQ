@@ -4,7 +4,9 @@ import matplotlib.pyplot as plt
 import os
 import pandas as pd
 from PIL import Image
-
+from typing import List, Optional, Dict
+from FewShotIQ.classification import few_shot_fault_classification
+from FewShotIQ.evaluation import compute_classification_metrics
 
 
 def vary_number_fewshot_examples(

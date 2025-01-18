@@ -128,6 +128,7 @@ class TestImageUtils(unittest.TestCase):
         repo_name = "qe_genai"
         base_path = "data/pan_images/train"
         subfolder = "nominal"
+        file_extensions = [".pdf"]
         
 
         # Assert: The function should handle the exception gracefully

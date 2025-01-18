@@ -1,10 +1,19 @@
 import csv
 from datetime import datetime
 import os
+import pandas as pd
 from PIL import Image
 import torch
 import torch.nn.functional as F
-from typing import List
+import requests
+import openai
+import clip
+import seaborn as sns
+import numpy as np
+from typing import List, Optional, Any
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+
 
 
 def evaluate_zero_shot_predictions(
@@ -163,6 +172,7 @@ def few_shot_fault_classification(
     defective_images: List[Image.Image],
     defective_descriptions: List[str],
     num_few_shot_nominal_imgs: int,
+    model: torch.nn.Module,
     file_path: str = '/content',
     file_name: str = 'image_classification_results.csv',
     print_one_liner: bool = False
@@ -286,3 +296,26 @@ def few_shot_fault_classification(
             writer.writerow(row)
 
     return ""
+
+
+# Map classification_result and defective_description to multiclass labels
+def map_multiclass_labels(row):
+    if row['classification_result'] == 'Nominal':
+        return 'Nominal'
+    elif 'band' in row['defective_description']:
+        return 'Band'
+    elif 'bimodal' in row['defective_description']:
+        return 'Bimodal'
+    elif 'single crystal' in row['defective_description']:
+        return 'Single Crystal'
+    else:
+        return 'Unknown'
+
+# Function to calculate specificity for each class
+def calculate_specificity(conf_matrix, labels):
+    specificity = []
+    for i in range(len(labels)):
+        true_negatives = conf_matrix.sum() - (conf_matrix[i, :].sum() + conf_matrix[:, i].sum() - conf_matrix[i, i])
+        false_positives = conf_matrix[:, i].sum() - conf_matrix[i, i]
+        specificity.append(true_negatives / (true_negatives + false_positives) if (true_negatives + false_positives) > 0 else 0)
+    return specificity
