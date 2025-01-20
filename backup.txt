@@ -1,5 +1,0 @@
-from FewShotIQ.image_utils import load_package_image
-
-# Load an image from the package's data folder
-image = load_package_image("pan_images/test/defective/IMG_1514.JPG")
-image.show(

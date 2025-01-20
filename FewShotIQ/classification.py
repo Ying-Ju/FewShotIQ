@@ -296,26 +296,3 @@ def few_shot_fault_classification(
             writer.writerow(row)
 
     return ""
-
-
-# Map classification_result and defective_description to multiclass labels
-def map_multiclass_labels(row):
-    if row['classification_result'] == 'Nominal':
-        return 'Nominal'
-    elif 'band' in row['defective_description']:
-        return 'Band'
-    elif 'bimodal' in row['defective_description']:
-        return 'Bimodal'
-    elif 'single crystal' in row['defective_description']:
-        return 'Single Crystal'
-    else:
-        return 'Unknown'
-
-# Function to calculate specificity for each class
-def calculate_specificity(conf_matrix, labels):
-    specificity = []
-    for i in range(len(labels)):
-        true_negatives = conf_matrix.sum() - (conf_matrix[i, :].sum() + conf_matrix[:, i].sum() - conf_matrix[i, i])
-        false_positives = conf_matrix[:, i].sum() - conf_matrix[i, i]
-        specificity.append(true_negatives / (true_negatives + false_positives) if (true_negatives + false_positives) > 0 else 0)
-    return specificity

@@ -27,6 +27,7 @@ This module provides functions to handle images, such as loading, animating, and
 - `load_package_image(image_path: str)`
     Loads an image from the package's data directory.
 
+
 `classification` Module
 Perform zero-shot and few-shot classification with pre-trained models.
 
@@ -36,18 +37,18 @@ Perform zero-shot and few-shot classification with pre-trained models.
 - `few_shot_fault_classification(...)`
     Fine-tunes a model for few-shot classification tasks.
 
-- `map_multiclass_labels(row)`
-    Map classification_result and defective_description to multiclass labels
-
-- `calculate_specificity(conf_matrix, labels)`
-   Calculate specificity for each class
-
 
 `evaluation` Module
 Evaluate classification performance.
 
 - `compute_classification_metrics(...)`
     Compute standard classification metrics such as accuracy, precision, recall, and F1-score from a CSV file containing classification results.
+
+- `map_multiclass_labels(row, major_labels, sub_labels)`
+    Map classification_result and defective_description to multiclass labels
+
+- `calculate_specificity(conf_matrix, labels)`
+   Calculate specificity for each class
 
 
 `visualization` Module
@@ -87,7 +88,7 @@ img = load_image("path/to/image.jpg")
 img.show()
 
 # Load an image from a URL
-img = load_image("http://example.com/image.jpg")
+img = load_image("https://github.com/Ying-Ju/FewShotIQ/blob/main/FewShotIQ/data/pan_images/test/defective/IMG_1514.JPG?raw=true")
 img.show()
 ```
 
@@ -204,7 +205,7 @@ if not os.path.exists(save_folder):
 print(f"Final save folder: {save_folder}")
 
 import random
-from FewShotIQ.image_utils import get_image_urls, load_images
+from FewShotIQ.image_utils import get_image_urls, load_image
 
 
 # Set the GitHub repository details
@@ -288,22 +289,240 @@ classification_results = few_shot_fault_classification(
     defective_descriptions = defective_descriptions,
     num_few_shot_nominal_imgs = len(nominal_images),
     model = model,
-    file_path = save_folder, 
-    file_name = 'results.csv',   #save_folder should be replaced by the name of user's folder
+    file_path = save_folder,      #save_folder should be replaced by the name of user's folder
+    file_name = 'results.csv',   
     print_one_liner = False
 )
 ```
-    
-   
+
+### `evaluation` Module
+
+### Computing Classification Metrics 
+The following code chunk gives an example to compute standard classification metrics such as accuracy, precision, recall, and F1-score from a CSV file containing classification results. Suppose the `few_shot_fault_classification()` function was used to conduct few-shot classification with CLIP, and the result file `results.csv` was saved in the `save_folder`, the folder you decided earlier. Our example includes 225 nominal images and 75 images for each defective class (Band, Bimodal, Single Crystal). Our example file `results.csv` can be downloaded [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/FewShotIQ/data/results.csv?token=GHSAT0AAAAAAC5O5XFHU7F6M2YPM5RHTW3SZ4L6IYQ).
 
 
-### Map classification_result and defective_description to multiclass labels
-map_multiclass_labels(row)
-   
+```python
+import os
+import pandas as pd                  # For working with dataframes
+import matplotlib.pyplot as plt      # For plotting
+import seaborn as sns                # For creating heatmaps
+from sklearn.metrics import (        # For evaluating model performance
+    confusion_matrix,
+    accuracy_score,
+    recall_score,
+    precision_score,
+    f1_score
+)
+from typing import List, Optional, Dict
 
-### Function to calculate specificity for each class
-calculate_specificity(conf_matrix, labels):
-    
+from FewShotIQ.evaluation import compute_classification_matrics
+
+classification_metrics = compute_classification_metrics(
+    csv_file = f'{save_folder}/results.csv',
+    labels = ["Nominal", "Defective"],
+    label_counts = [len(test_nominal_images), len(test_defective_images)],
+    num_few_shot_nominal_imgs = len(nominal_images),
+    save_confusion_matrix = True,
+    cm_file_path = save_folder,
+    cm_file_name = "confusion_matrix.png"
+    )
+
+# Rounding for display
+classification_metrics.Value = classification_metrics.Value.round(3)
+
+# Drop the row corresponding to num_few_shot_nominal_imgs since it is not a classification metric
+classification_metrics = classification_metrics.drop(index=0).reset_index(drop=True)
+
+# Display the created confusion metrics figure
+print("\n\033[1mConfusion Matrix\033[1m")
+display(IPyImage(filename=f"{save_folder}/confusion_matrix.png"))
+
+# Display the metrics as a table with three digit precision
+print("\n\033[1mClassification Metrics:\033[1m")
+display(classification_metrics)
+```
+
+
+#### Computing Major Label Accuracy for Multiclass
+
+Here, we use an example to show the use of these two functions: `map_multiclass_labels` and `calculate_specificity()` to compute major label accuracy for multiclass. Suppose the `few_shot_fault_classification()` function was used to conduct few-shot classification with CLIP, and the result file `results.csv` was saved in the `save_folder`, the folder you decided earlier. Our example includes 225 nominal images and 75 images for each defective class (Band, Bimodal, Single Crystal). Our example file `results.csv` can be downloaded [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/FewShotIQ/data/results.csv?token=GHSAT0AAAAAAC5O5XFHU7F6M2YPM5RHTW3SZ4L6IYQ).
+
+```python
+import pandas as pd                  # For working with dataframes
+import numpy as np                   # For numerical computations
+import matplotlib.pyplot as plt      # For plotting
+import seaborn as sns                # For creating heatmaps
+from sklearn.metrics import (        # For evaluating model performance
+    confusion_matrix,
+    accuracy_score,
+    recall_score,
+    precision_score,
+    f1_score
+)
+from FewShotIQ.evaluation import map_multiclass_labels, calculate_specificity
+
+classification_results = pd.read_csv(f'{save_folder}/results.csv')
+
+# Define the major and sub-labels
+labels = ['Nominal', 'Band', 'Bimodal', 'Single Crystal']
+
+# Apply the map_multiclass_labels function with additional arguments
+classification_results['predicted_label'] = classification_results.apply(
+    map_multiclass_labels, axis=1, major_labels=labels
+)
+
+# Create true labels based on the given sequence
+true_labels = (
+    ['Nominal'] * 225 +
+    ['Band'] * 75 +
+    ['Bimodal'] * 75 +
+    ['Single Crystal'] * 75
+)
+
+classification_results['true_label'] = true_labels
+
+# Compute the confusion matrix
+cm = confusion_matrix(classification_results['true_label'], classification_results['predicted_label'], labels=labels)
+
+# Compute metrics
+accuracy = accuracy_score(classification_results['true_label'], classification_results['predicted_label'])
+recall = recall_score(classification_results['true_label'], classification_results['predicted_label'], average='macro', zero_division=0)
+precision = precision_score(classification_results['true_label'], classification_results['predicted_label'], average='macro', zero_division=0)
+f1 = f1_score(classification_results['true_label'], classification_results['predicted_label'], average='macro', zero_division=0)
+specificity = calculate_specificity(cm, labels)
+average_specificity = np.mean(specificity)
+
+
+# Plot the confusion matrix
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=labels, yticklabels=labels, vmin=0, vmax=225)
+plt.title("Confusion Matrix for Primary Multi-Class Labels for Experiment 05")
+plt.xlabel("Predicted Label")
+plt.ylabel("True Label")
+plt.savefig(f"{save_folder}/exp05_confusion_matrix_major_labels.png")
+plt.show()
+
+# Display metrics
+classification_metrics = {
+    'Accuracy': accuracy,
+    'Recall (Macro Avg)': recall,
+    'Specificity (Macro Avg)': average_specificity,
+    'Precision (Macro Avg)': precision,
+    'F1-Score (Macro Avg)': f1
+}
+print("\n\033[1mClassification Metrics:\033[1m")
+classification_metrics = pd.DataFrame(classification_metrics.items(), columns=['Metric', 'Value'])
+classification_metrics['Value'] = classification_metrics['Value'].round(3)
+display(classification_metrics)
+```   
+
+#### Computing the Per Sub Label Accuracy
+
+Similar to the previous example, we show the use of these two functions: `map_multiclass_labels` and `calculate_specificity()` to compute per sub label accuracy for multiclass. Suppose the `few_shot_fault_classification()` function was used to conduct few-shot classification with CLIP, and the result file `results.csv` was saved in the `save_folder`, the folder you decided earlier. Our example includes 225 nominal images and 25 images for each defective class (Low Band, Medium Band, High Band, Low Bimodal, Medium Bimodal, High Bimodal, Low Single, Medium Single, High Single). Our example file `results.csv` can be downloaded [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/FewShotIQ/data/results.csv?token=GHSAT0AAAAAAC5O5XFHU7F6M2YPM5RHTW3SZ4L6IYQ).
+
+
+ ```python
+import pandas as pd                  # For working with dataframes
+import numpy as np                   # For numerical computations
+import matplotlib.pyplot as plt      # For plotting
+import seaborn as sns                # For creating heatmaps
+from sklearn.metrics import (        # For evaluating model performance
+    confusion_matrix,
+    accuracy_score,
+    recall_score,
+    precision_score,
+    f1_score
+)
+from FewShotIQ.evaluation import map_multiclass_labels, calculate_specificity
+
+classification_results = pd.read_csv(f'{save_folder}/results.csv')
+
+# Define the major and sub-labels
+major_labels = ['Nominal', 'Band', 'Bimodal', 'Single']
+sub_labels = ['Low', 'Medium', 'High']
+
+# Apply the map_multiclass_labels function with additional arguments
+classification_results['predicted_label'] = classification_results.apply(
+    map_multiclass_labels, axis=1, major_labels=major_labels, sub_labels=sub_labels
+)
+
+# Create true labels based on the given sequence
+true_labels = (
+    ['Nominal'] * 225 +
+    ['High Band'] * 25 +
+    ['Low Band'] * 25 +
+    ['Medium Band'] * 25 +
+    ['High Bimodal'] * 25 +
+    ['Low Bimodal'] * 25 +
+    ['Medium Bimodal'] * 25 +
+    ['High Single'] * 25 +
+    ['Low Single'] * 25 +
+    ['Medium Single'] * 25
+)
+
+classification_results['true_label'] = true_labels
+
+# Compute the confusion matrix
+labels = [
+    'Nominal', 'High Band', 'Low Band', 'Medium Band',
+    'High Bimodal', 'Low Bimodal', 'Medium Bimodal',
+    'High Single', 'Low Single', 'Medium Single'
+]
+
+cm = confusion_matrix(classification_results['true_label'], classification_results['predicted_label'], labels=labels)
+
+# Compute metrics
+accuracy = accuracy_score(classification_results['true_label'], classification_results['predicted_label'])
+recall = recall_score(classification_results['true_label'], classification_results['predicted_label'], average='macro', zero_division=0)
+precision = precision_score(classification_results['true_label'], classification_results['predicted_label'], average='macro', zero_division=0)
+f1 = f1_score(classification_results['true_label'], classification_results['predicted_label'], average='macro', zero_division=0)
+specificity = calculate_specificity(cm, labels)
+average_specificity = np.mean(specificity)
+
+# Plot the confusion matrix
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=labels, yticklabels=labels, vmin=0, vmax=225)
+plt.title("Confusion Matrix for Secondary Multi-Class Labels for Experiment 05")
+plt.xlabel("Predicted Label")
+plt.ylabel("True Label")
+plt.savefig(f"{save_folder}/exp05_confusion_matrix_minor_labels.png")
+plt.show()
+
+
+# Display metrics
+classification_metrics = {
+    'Accuracy': accuracy,
+    'Recall (Macro Avg)': recall,
+    'Specificity (Macro Avg)': average_specificity,
+    'Precision (Macro Avg)': precision,
+    'F1-Score (Macro Avg)': f1
+}
+print("\n\033[1mClassification Metrics:\033[1m")
+classification_metrics = pd.DataFrame(classification_metrics.items(), columns=['Metric', 'Value'])
+classification_metrics['Value'] = classification_metrics['Value'].round(3)
+display(classification_metrics)
+ 
+ ```   
+
+
+### `visualization` Module
+
+####
+ `vary_number_fewshot_example(...)`
+Vary the size of the learning set and evaluate classification performance.
+
+####
+- `create_confusion_matrix_gif(...)`
+Creates a GIF of confusion matrix images and displays it.
+
+####
+- `preprocess_and_plot_learning_size_metrics(...)`
+Preprocesses raw repeated-block data and plots learning size metrics.
+
+####
+- `preprocess_and_plot_two_models(...)`
+Preprocesses two raw datasets and plots learning size metrics for both.
+
 
 ## Additional Notes
 

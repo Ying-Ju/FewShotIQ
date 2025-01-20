@@ -9,6 +9,7 @@ from sklearn.metrics import (
 from typing import List, Optional, Dict
 
 
+
 def compute_classification_metrics(
     csv_file: str,
     labels: List[str],
@@ -102,3 +103,52 @@ def compute_classification_metrics(
         plt.show()
 
     return metrics
+
+
+# Map classification_result and defective_description to multiclass labels
+def map_multiclass_labels(row, major_labels, sub_labels=None):
+    """
+    General function to map classification_result and defective_description to multiclass labels.
+
+    Parameters:
+        row: A row from a Pandas data frame containing 'classification_result' and 'defective_description'.
+        major_labels (list): List of possible major labels. The first component should be Nominal class or alike. 
+        sub_labels (list, optional): List of possible sub-labels. Default is None. The sub_labels are used to describe defective classes in the major labels.
+
+    Returns:
+        str: The corresponding label.
+    """
+    row['defective_description'] = row['defective_description'].title()
+    # Check for major label
+    if not sub_labels:
+        if row['classification_result'] == major_labels[0]:
+            return major_labels[0]
+
+        for major in major_labels[1:]:
+            if major in row['defective_description']:
+                return major
+    
+    # Check for sub-label if provided
+    if sub_labels:
+        if row['classification_result'] == major_labels[0]:
+            return major_labels[0]
+        
+        sub_major_labels = [f"{sub} {major}" for major in major_labels[1:] for sub in sub_labels]
+
+        for sub_major in sub_major_labels:
+            if sub_major in row['defective_description']:
+                return sub_major
+            
+    # Default case
+    return 'Unknown'
+
+
+
+# Function to calculate specificity for each class
+def calculate_specificity(conf_matrix, labels):
+    specificity = []
+    for i in range(len(labels)):
+        true_negatives = conf_matrix.sum() - (conf_matrix[i, :].sum() + conf_matrix[:, i].sum() - conf_matrix[i, i])
+        false_positives = conf_matrix[:, i].sum() - conf_matrix[i, i]
+        specificity.append(true_negatives / (true_negatives + false_positives) if (true_negatives + false_positives) > 0 else 0)
+    return specificity
