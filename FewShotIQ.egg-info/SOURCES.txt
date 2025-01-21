@@ -5,10 +5,12 @@ FewShotIQ/__init__.py
 FewShotIQ/classification.py
 FewShotIQ/evaluation.py
 FewShotIQ/image_utils.py
+FewShotIQ/test.py
 FewShotIQ/visualization.py
 FewShotIQ.egg-info/PKG-INFO
 FewShotIQ.egg-info/SOURCES.txt
 FewShotIQ.egg-info/dependency_links.txt
+FewShotIQ.egg-info/requires.txt
 FewShotIQ.egg-info/top_level.txt
 FewShotIQ/data/extrusion_images/normal/frame0.jpg
 FewShotIQ/data/extrusion_images/normal/frame1.jpg
@@ -3478,6 +3480,9 @@ FewShotIQ/data/textile_images/nominal/textile_0997.jpg
 FewShotIQ/data/textile_images/nominal/textile_0998.jpg
 FewShotIQ/data/textile_images/nominal/textile_0999.jpg
 FewShotIQ/data/textile_images/nominal/textile_1000.jpg
+FewShotIQ/data/usage_examples/exp03_aggregated_results.csv
+FewShotIQ/data/usage_examples/exp03_b32_aggregated_results.csv
+FewShotIQ/data/usage_examples/results.csv
 tests/test_classification.py
 tests/test_evaluation.py
 tests/test_image_utils.py

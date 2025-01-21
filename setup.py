@@ -4,7 +4,6 @@ setup(
     name="FewShotIQ",               # package name
     version="0.1.0",                # Initial version
     packages=find_packages(),       # Automatically find sub-packages
-    install_requires=[],            # Add dependencies here, e.g., ["numpy", "torch"]
     include_package_data = True,
     package_data ={
         "FewShotIQ": ["data/**/*"]
@@ -24,12 +23,6 @@ setup(
     extras_require={
         "clip": ["clip @ git+https://github.com/openai/CLIP.git"],  # Optional for CLIP
     },
-    python_requires=">=3.7",
-    classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
-    ],
     python_requires=">=3.10",        # Minimum Python version required
     description="FewShotIQ: Few-Shot Image Quality Inspection and Quantification",
     author="Fadel M Megahed, Ying-Ju Chen, Bianca Maria Colosimo, Marco Luigi Giuseppe Grasso, L. Allison Jones-Farmer, Sven Knoth, Hongyue Sun, Inez Zwetsloot",
