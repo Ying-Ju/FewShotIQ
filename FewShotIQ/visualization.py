@@ -133,106 +133,35 @@ def create_confusion_matrix_gif(prefix, learn_size, duration, save_folder, file_
 
 
 def preprocess_and_plot_learning_size_metrics(
-    raw_data, save_folder, save_file_name, y_limits, label_positions, suptitle, figure_size
+    raw_data1, 
+    save_folder, 
+    save_file_name, 
+    y_limits, 
+    label_positions, 
+    suptitle, 
+    figure_size, 
+    raw_data2=None, 
+    colors=None, 
+    labels=None
 ):
     """
-    Preprocesses raw repeated-block data and plots learning size metrics.
-
-    Args:
-        raw_data (pd.DataFrame): Raw DataFrame with repeated blocks for each learning size.
-        save_folder (str): Folder to save the plot image.
-        save_file_name (str): Name of the saved plot file.
-        y_limits (list): Y-axis limits for all plots [y_min, y_max].
-        label_positions (set): X-values where labels and black markers should be displayed.
-        suptitle (str): The main title for the plot.
-        figure_size (tuple): Size of the figure (width, height).
-
-    Returns:
-        None
-    """
-    # Preprocess the raw data
-    blocks = []
-    num_few_shot_nominal_imgs = None
-    for index, row in raw_data.iterrows():
-        if "Nominal Learning Size" in row["Metric"]:
-            num_few_shot_nominal_imgs = float(row["Value"])
-        else:
-            blocks.append({
-                "Nominal Learning Size": num_few_shot_nominal_imgs,
-                row["Metric"]: float(row["Value"])
-            })
-
-    # Combine blocks into a DataFrame
-    processed_data = pd.DataFrame(blocks).groupby("Nominal Learning Size").first().reset_index()
-
-    # Define metrics and their display names
-    metrics = ["Accuracy", "Specificity", "Sensitivity (Recall)", "Precision", "F1 Score", "AUC"]
-    metric_titles = ["Accuracy", "Specificity", "Sensitivity", "Precision", "F1 Score", "AUC"]
-
-    # Plot the data
-    fig, axes = plt.subplots(nrows=2, ncols=3, figsize=figure_size)
-    axes = axes.flatten()
-
-    for i, (metric, title) in enumerate(zip(metrics, metric_titles)):
-        ax = axes[i]
-        ax.plot(
-            processed_data["Nominal Learning Size"],
-            processed_data[metric],
-            marker='o',
-            color='gray',
-            linewidth=1.5,
-            markersize=5
-        )
-
-        for x, y in zip(processed_data["Nominal Learning Size"], processed_data[metric]):
-            if x in label_positions:
-                ax.plot(x, y, marker='o', color='black', markersize=6)
-                ax.text(x, y + 0.02, f"{y:.2f}", ha='center', va='bottom', fontsize=10, color='black')
-
-        ax.set_title(title, fontsize=14)
-        ax.set_xlabel("Nominal Learning Set Size", fontsize=12)
-        ax.set_ylabel(title, fontsize=12)
-        ax.set_ylim(y_limits)
-        ax.grid(False)
-
-    plt.tight_layout()
-    plt.subplots_adjust(top=0.9, hspace=0.3)
-    plt.suptitle(suptitle, fontsize=16)
-    plt.figtext(
-        0.5, -0.05,
-        "Note: Black markers at specified points highlight values for clarity, "
-        "showing the trend in metric values as learning size increases.",
-        ha="center", fontsize=10
-    )
-    save_path = f"{save_folder}/{save_file_name}"
-    plt.savefig(save_path, format='png', dpi=300, bbox_inches='tight')
-    plt.show()
-
-
-def preprocess_and_plot_two_models(
-    raw_data1, raw_data2, save_folder, save_file_name, y_limits, label_positions, suptitle, figure_size, colors, labels
-):
-    """
-    Preprocesses two raw datasets and plots learning size metrics for both.
+    Preprocesses raw data and plots learning size metrics. Handles one or two datasets.
 
     Args:
         raw_data1 (pd.DataFrame): First raw DataFrame with repeated blocks for each learning size.
-        raw_data2 (pd.DataFrame): Second raw DataFrame with repeated blocks for each learning size.
         save_folder (str): Folder to save the plot image.
         save_file_name (str): Name of the saved plot file.
         y_limits (list): Y-axis limits for all plots [y_min, y_max].
         label_positions (set): X-values where labels and black markers should be displayed.
         suptitle (str): The main title for the plot.
         figure_size (tuple): Size of the figure (width, height).
-        colors (list): List of colors for the two datasets (e.g., ['blue', 'orange']).
-        labels (list): List of labels for the two datasets (e.g., ['Dataset 1', 'Dataset 2']).
+        raw_data2 (pd.DataFrame, optional): Second raw DataFrame for comparison. Defaults to None.
+        colors (list, optional): List of colors for datasets (e.g., ['blue', 'orange']). Defaults to None.
+        labels (list, optional): List of labels for datasets (e.g., ['Dataset 1', 'Dataset 2']). Defaults to None.
 
     Returns:
         None
     """
-    import pandas as pd
-    import matplotlib.pyplot as plt
-
     def preprocess(raw_data):
         """Preprocesses a single dataset."""
         blocks = []
@@ -249,7 +178,7 @@ def preprocess_and_plot_two_models(
 
     # Preprocess the data
     processed_data1 = preprocess(raw_data1)
-    processed_data2 = preprocess(raw_data2)
+    processed_data2 = preprocess(raw_data2) if raw_data2 is not None else None
 
     # Define metrics and their display names
     metrics = ["Accuracy", "Specificity", "Sensitivity (Recall)", "Precision", "F1 Score", "AUC"]
@@ -267,21 +196,10 @@ def preprocess_and_plot_two_models(
             processed_data1["Nominal Learning Size"],
             processed_data1[metric],
             marker='o',
-            color=colors[0],
+            color=colors[0] if colors else 'grey',
             linewidth=1.5,
             markersize=5,
-            label=labels[0]
-        )
-
-        # Plot second dataset
-        ax.plot(
-            processed_data2["Nominal Learning Size"],
-            processed_data2[metric],
-            marker='s',
-            color=colors[1],
-            linewidth=1.5,
-            markersize=5,
-            label=labels[1]
+            label=labels[0] if labels else 'Dataset 1'
         )
 
         # Highlight labels for first dataset
@@ -290,18 +208,31 @@ def preprocess_and_plot_two_models(
                 ax.plot(x, y, marker='o', color='black', markersize=6)
                 ax.text(x, y + 0.02, f"{y:.2f}", ha='center', va='bottom', fontsize=10, color='black')
 
-        # Highlight labels for second dataset
-        for x, y in zip(processed_data2["Nominal Learning Size"], processed_data2[metric]):
-            if x in label_positions:
-                ax.plot(x, y, marker='s', color='black', markersize=6)
-                ax.text(x, y + 0.02, f"{y:.2f}", ha='center', va='bottom', fontsize=10, color='black')
+        # Plot second dataset if provided
+        if processed_data2 is not None:
+            ax.plot(
+                processed_data2["Nominal Learning Size"],
+                processed_data2[metric],
+                marker='s',
+                color=colors[1] if colors else 'orange',
+                linewidth=1.5,
+                markersize=5,
+                label=labels[1] if labels else 'Dataset 2'
+            )
+
+            # Highlight labels for second dataset
+            for x, y in zip(processed_data2["Nominal Learning Size"], processed_data2[metric]):
+                if x in label_positions:
+                    ax.plot(x, y, marker='s', color='black', markersize=6)
+                    ax.text(x, y + 0.02, f"{y:.2f}", ha='center', va='bottom', fontsize=10, color='black')
 
         ax.set_title(title, fontsize=14)
         ax.set_xlabel("Nominal Learning Set Size", fontsize=12)
         ax.set_ylabel(title, fontsize=12)
         ax.set_ylim(y_limits)
         ax.grid(False)
-        ax.legend()
+        if labels:
+            ax.legend()
 
     plt.tight_layout()
     plt.subplots_adjust(top=0.9, hspace=0.3)
