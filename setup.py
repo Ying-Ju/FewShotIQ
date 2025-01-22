@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name="FewShotIQ",               # package name
     version="0.1.0",                # Initial version
-    packages=find_packages(),       # Automatically find sub-packages
+    packages=find_packages(exclude=["tests", "tests.*"]),       # Automatically find sub-packages
     include_package_data = False,
     install_requires=[
         "openai>=0.27.0",
