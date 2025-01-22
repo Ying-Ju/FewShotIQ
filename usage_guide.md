@@ -285,7 +285,7 @@ classification_results = few_shot_fault_classification(
 ### `evaluation` Module
 
 ### Computing Classification Metrics 
-The following code chunk gives an example to compute standard classification metrics such as accuracy, precision, recall, and F1-score from a CSV file containing classification results. Suppose the `few_shot_fault_classification()` function was used to conduct few-shot classification with CLIP, and the result file `results.csv` was saved in the `save_folder`, the folder you decided earlier. Our example includes 225 nominal images and 75 images for each defective class (Band, Bimodal, Single Crystal). Our example file `results.csv` can be downloaded [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/FewShotIQ/data/usage_examples/results.csv).
+The following code chunk gives an example to compute standard classification metrics such as accuracy, precision, recall, and F1-score from a CSV file containing classification results. Suppose the `few_shot_fault_classification()` function was used to conduct few-shot classification with CLIP, and the result file `results.csv` was saved in the `save_folder`, the folder you decided earlier. Our example includes 225 nominal images and 75 images for each defective class (Band, Bimodal, Single Crystal). Our example file `results.csv` can be downloaded [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/usage_examples/results.csv).
 
 
 ```python
@@ -332,7 +332,7 @@ display(classification_metrics)
 
 #### Computing Major Label Accuracy for Multiclass
 
-Here, we use an example to show the use of these two functions: `map_multiclass_labels` and `calculate_specificity()` to compute major label accuracy for multiclass. Suppose the `few_shot_fault_classification()` function was used to conduct few-shot classification with CLIP, and the result file `results.csv` was saved in the `save_folder`, the folder you decided earlier. Our example includes 225 nominal images and 75 images for each defective class (Band, Bimodal, Single Crystal). The example file `results.csv` can be downloaded [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/FewShotIQ/data/usage_examples/results.csv).
+Here, we use an example to show the use of these two functions: `map_multiclass_labels` and `calculate_specificity()` to compute major label accuracy for multiclass. Suppose the `few_shot_fault_classification()` function was used to conduct few-shot classification with CLIP, and the result file `results.csv` was saved in the `save_folder`, the folder you decided earlier. Our example includes 225 nominal images and 75 images for each defective class (Band, Bimodal, Single Crystal). The example file `results.csv` can be downloaded [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/usage_examples/results.csv).
 
 ```python
 import pandas as pd                  # For working with dataframes
@@ -405,7 +405,7 @@ display(classification_metrics)
 
 #### Computing the Per Sub Label Accuracy
 
-Similar to the previous example, we show the use of these two functions: `map_multiclass_labels` and `calculate_specificity()` to compute per sub label accuracy for multiclass. Suppose the `few_shot_fault_classification()` function was used to conduct few-shot classification with CLIP, and the result file `results.csv` was saved in the `save_folder`, the folder you decided earlier. Our example includes 225 nominal images and 25 images for each defective class (Low Band, Medium Band, High Band, Low Bimodal, Medium Bimodal, High Bimodal, Low Single, Medium Single, High Single). Our example file `results.csv` can be downloaded [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/FewShotIQ/data/usage_examples/results.csv).
+Similar to the previous example, we show the use of these two functions: `map_multiclass_labels` and `calculate_specificity()` to compute per sub label accuracy for multiclass. Suppose the `few_shot_fault_classification()` function was used to conduct few-shot classification with CLIP, and the result file `results.csv` was saved in the `save_folder`, the folder you decided earlier. Our example includes 225 nominal images and 25 images for each defective class (Low Band, Medium Band, High Band, Low Bimodal, Medium Bimodal, High Bimodal, Low Single, Medium Single, High Single). Our example file `results.csv` can be downloaded [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/usage_examples/results.csv).
 
 
  ```python
@@ -696,7 +696,7 @@ create_confusion_matrix_gif(
 
 #### Visualizing the Impact of Learning Size on Classification Metrics
 
-Follow the previous example for applying `vary_number_fewshot_examples{}` function, we preprocesses raw repeated-block data and plots learning size metrics. In the example, the *exp03_aggregated_results.csv* was an output from the `vary_number_fewshot_examples{}` function. One should note that "exp03" is the prefix for saved CSV and PNG file names in this example. Our example *exp03_aggregated_results.csv* can be found [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/FewShotIQ/data/usage_examples/exp03_aggregated_results.csv).
+Follow the previous example for applying `vary_number_fewshot_examples{}` function, we preprocesses raw repeated-block data and plots learning size metrics. In the example, the *exp03_aggregated_results.csv* was an output from the `vary_number_fewshot_examples{}` function. One should note that "exp03" is the prefix for saved CSV and PNG file names in this example. Our example *exp03_aggregated_results.csv* can be found [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/usage_examples/exp03_aggregated_results.csv).
 
 ```python
 import os
@@ -721,7 +721,7 @@ preprocess_and_plot_learning_size_metrics(
 
 #### Visualizing the Impact of Model Choice on Classification Metrics
 
-The following code chunk shows an example to use the `preprocess_and_plot_learning_size_metrics()` function to preprocess two raw datasets, which are output files by applying `vary_number_fewshot_examples{}` function using two models individually and plots learning size metrices for both. In the example below, these two models are *ViT-L/14* and *vit-b/32*. One should note that "exp03" is the prefix for saved CSV and PNG file names in this example. The example files *exp03_aggregated_results.csv* can be found [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/FewShotIQ/data/usage_examples/exp03_aggregated_results.csv) and *exp03_b32_aggregated_results.csv* can be founded [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/FewShotIQ/data/usage_examples/exp03_b32_aggregated_results.csv).
+The following code chunk shows an example to use the `preprocess_and_plot_learning_size_metrics()` function to preprocess two raw datasets, which are output files by applying `vary_number_fewshot_examples{}` function using two models individually and plots learning size metrices for both. In the example below, these two models are *ViT-L/14* and *vit-b/32*. One should note that "exp03" is the prefix for saved CSV and PNG file names in this example. The example files *exp03_aggregated_results.csv* can be found [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/usage_examples/exp03_aggregated_results.csv) and *exp03_b32_aggregated_results.csv* can be founded [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/usage_examples/exp03_b32_aggregated_results.csv).
 
 
 ```python
