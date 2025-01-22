@@ -14,4 +14,4 @@ A Python package for efficient few-shot image quality inspection and quantificat
 pip install FewShotIQ
 ```
 
-For detailed usage, see the [Usage Guide](usage_guide.md).
+For detailed usage, see the [Usage Guide](https://github.com/Ying-Ju/FewShotIQ/blob/main/docs/usage_guide.md).
