@@ -67,23 +67,38 @@ Preprocesses one or two raw repeated-block datasets and plots learning size metr
 
 #### Loading Images 
 
+The following code chunk gives examples to load an image from a local path or a URL using the `load_image()` function.
+
 ```python
+from urllib.parse import urlparse  # To check if the input is a URL
+from io import BytesIO            # To handle binary data from the URL
+import requests                   # To fetch the image from a URL
+from PIL import Image             # To load and process images
 from FewShotIQ.image_utils import load_image
 
 # Load an image from a local path
-img = load_image("path/to/image.jpg")
+img = load_image("tests/resources/NewRiverGorge.jpg")
 img.show()
 
 # Load an image from a URL
-img = load_image("https://github.com/Ying-Ju/FewShotIQ/blob/main/FewShotIQ/data/pan_images/test/defective/IMG_1514.JPG?raw=true")
+img = load_image("https://github.com/Ying-Ju/FewShotIQ/blob/main/usage_examples/Love_River_Taiwan.jpg?raw=true")
 img.show()
 ```
 
 #### Create a GIF of animated images
 
-Animate nominal and defective images side-by-side with resizing only for images larger than 800x800 pixels.
+The following code chunk gives an example using the `animate_images()` function to animate nominal and defective images side-by-side with resizing only for images larger than 800x800 pixels. We use the image data from the GitHub Repository [qe_genai](https://github.com/fmegahed/qe_genai/tree/main/). This example also shows how to retrieve the URLs of files in a specified GitHub repository subfolder using the `get_image_urls()` function. Users must change the *save_folder* in the function input of `animate_images()` to the directory where they want to store the GIF file. 
+
 
 ```python
+from urllib.parse import urlparse # To determine if a string is a URL
+from io import BytesIO            # To handle binary image data from the URL
+import requests                   # To fetch images from URLs
+from PIL import Image             # To load and process images
+import textwrap                   # To wrap text for subtitles
+import matplotlib.pyplot as plt   # To create plots
+from matplotlib.animation import FuncAnimation  # To create animations
+from typing import List, Optional, Dict, Any # For type annotations
 from FewShotIQ.image_utils import get_image_urls, animate_images
 
 # Set the GitHub repository details
@@ -120,8 +135,8 @@ animate_images(
     resize_factor=0.15,
     pause_time=2.0,
     save_fig=True,
-    file_path=save_folder,
-    file_name="exp01_learning_images.gif"
+    file_path=save_folder,  # replace save_folder with a directory where the GIF file will be saved
+    file_name="pan_learning_images.gif"
 )
 ```
 
@@ -131,19 +146,13 @@ In order to use the functions `evaluate_zero_shot_predictions()` and `few_shot_f
 
 
 ```python
-import os
-from io import BytesIO
+import os                           # To work with file paths and directories
+import random                       # To shuffle or select random items
 import importlib.util
 import subprocess
-import csv
-from urllib.parse import urlparse
-from IPython.display import Image as IPyImage, display, clear_output
-import time
-import json
-import random
 
 # packages that need to be installed in the colab
-packages = ['openai', 'torch', 'pillow', 'requests', 'clip', 'datetime', 'matplotlib', 'pandas', 'sklearn', 'seaborn', 'numpy', 'typing']
+packages = ['openai', 'torch', 'pillow', 'requests', 'clip', 'typing']
 
 # installing the packages if needed
 for package in packages:
@@ -156,25 +165,18 @@ for package in packages:
   else:
     print(f"{package} already installed.")
 
-# importing those packages
-import requests
-from PIL import Image
-import openai
-import clip
-import torch
-import pandas as pd
-import seaborn as sns
-import numpy as np
-
-# importing specific functions/modules from those libraries
-from typing import List, Optional, Union, Any
-from datetime import datetime
+from typing import List, Optional, Dict, Any    # For type annotations
+import openai                                   # To use the OpenAI API
+import clip                                     # For CLIP model loading and preprocessing
+import torch                                    # For tensor operations and checking CUDA availability
+from PIL import Image                           # To handle image loading and manipulation
 import torch.nn.functional as F
-import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 
-# package for importing our hidden key
-openai.api_key = userdata.get('OPENAI_API_KEY') # insert your key here
+import random
+from FewShotIQ.image_utils import get_image_urls, load_image
+
+# package for importing the hidden key
+openai.api_key = 'OPENAI_API_KEY' # insert your key here
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -190,9 +192,6 @@ if not os.path.exists(save_folder):
     os.makedirs(save_folder, exist_ok=True)
 
 print(f"Final save folder: {save_folder}")
-
-import random
-from FewShotIQ.image_utils import get_image_urls, load_image
 
 
 # Set the GitHub repository details
@@ -239,6 +238,18 @@ test_images = [preprocess(load_image(url)).unsqueeze(0).to(device) for url in te
 Suppose users have imported libraries, set the OpenAI API Key, saved folder location, and loaded images. In that case, they can directly execute the `evaluate_zero_shot_predictions()` function for zero-shot classification with CLIP. Otherwise, please review the previous sections for the relevant topics. 
 
 ```python
+import pandas as pd                  # For working with dataframes
+import matplotlib.pyplot as plt      # For plotting
+import seaborn as sns                # For creating heatmaps
+from sklearn.metrics import (        # For evaluating model performance
+    confusion_matrix,
+    accuracy_score,
+    recall_score,
+    precision_score,
+    f1_score
+)
+
+from IPython.display import Image as IPyImage, display, clear_output
 from FewShotIQ.classification import evaluate_zero_shot_predictions
 
 zero_shot_metrics, zero_shot_df = evaluate_zero_shot_predictions(
@@ -249,13 +260,13 @@ zero_shot_metrics, zero_shot_df = evaluate_zero_shot_predictions(
     model=model,
     device=device,
     save_confusion_matrix = True,
-    cm_title = "Confusion Matrix for Zero Shot Classification for Experiment 01",
+    cm_title = "Confusion Matrix for Zero Shot Classification",
     short_labels=['Nominal', 'Defective'],
     cm_file_path = save_folder,  #save_folder should be replaced by the name of user's folder
     cm_file_name = "zero_shot_confusion_matrix.png"
 )
 
-print("\n\033[1mConfusion Matrix for Experiment 01\033[1m\n")
+print("\n\033[1mConfusion Matrix\033[1m\n")
 display(zero_shot_metrics.round(3).set_index("Metric").T)
 
 ```
@@ -265,6 +276,8 @@ display(zero_shot_metrics.round(3).set_index("Metric").T)
 Suppose users have imported libraries, set the OpenAI API Key, saved folder location, and loaded images. In that case, they can directly execute the `few_shot_fault_classification()` function for few-shot classification with CLIP. Otherwise, please review the previous sections for the relevant topics. 
 
 ```python
+import os  # For file path and directory operations
+import csv  # For writing classification results to a CSV file               
 from FewShotIQ.classification import few_shot_fault_classification
 
 classification_results = few_shot_fault_classification(
@@ -277,7 +290,7 @@ classification_results = few_shot_fault_classification(
     num_few_shot_nominal_imgs = len(nominal_images),
     model = model,
     file_path = save_folder,      #save_folder should be replaced by the name of user's folder
-    file_name = 'results.csv',   
+    file_name = 'pan_results.csv',   
     print_one_liner = False
 )
 ```
@@ -285,11 +298,10 @@ classification_results = few_shot_fault_classification(
 ### `evaluation` Module
 
 ### Computing Classification Metrics 
-The following code chunk gives an example to compute standard classification metrics such as accuracy, precision, recall, and F1-score from a CSV file containing classification results. Suppose the `few_shot_fault_classification()` function was used to conduct few-shot classification with CLIP, and the result file `results.csv` was saved in the `save_folder`, the folder you decided earlier. Our example includes 225 nominal images and 75 images for each defective class (Band, Bimodal, Single Crystal). Our example file `results.csv` can be downloaded [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/usage_examples/results.csv).
+The following code chunk gives an example to compute standard classification metrics such as accuracy, precision, recall, and F1-score from a CSV file containing classification results. Suppose the `few_shot_fault_classification()` function was used to conduct few-shot classification with CLIP, and the result file `micro_results.csv` was saved in the `save_folder`, the folder you decided earlier. Our example includes 225 nominal images and 75 images for each defective class (Band, Bimodal, Single Crystal). Our example file `micro_results.csv` can be downloaded [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/usage_examples/micro_results.csv).
 
 
 ```python
-import os
 import pandas as pd                  # For working with dataframes
 import matplotlib.pyplot as plt      # For plotting
 import seaborn as sns                # For creating heatmaps
@@ -301,17 +313,17 @@ from sklearn.metrics import (        # For evaluating model performance
     f1_score
 )
 from typing import List, Optional, Dict
-
-from FewShotIQ.evaluation import compute_classification_matrics
+from IPython.display import Image as IPyImage, display, clear_output
+from FewShotIQ.evaluation import compute_classification_metrics
 
 classification_metrics = compute_classification_metrics(
-    csv_file = f'{save_folder}/results.csv',
+    csv_file = f'{save_folder}/micro_results.csv',
     labels = ["Nominal", "Defective"],
-    label_counts = [len(test_nominal_images), len(test_defective_images)],
-    num_few_shot_nominal_imgs = len(nominal_images),
+    label_counts = [225, 225],
+    num_few_shot_nominal_imgs = 225,
     save_confusion_matrix = True,
     cm_file_path = save_folder,
-    cm_file_name = "confusion_matrix.png"
+    cm_file_name = "micro_confusion_matrix.png"
     )
 
 # Rounding for display
@@ -322,7 +334,7 @@ classification_metrics = classification_metrics.drop(index=0).reset_index(drop=T
 
 # Display the created confusion metrics figure
 print("\n\033[1mConfusion Matrix\033[1m")
-display(IPyImage(filename=f"{save_folder}/confusion_matrix.png"))
+display(IPyImage(filename=f"{save_folder}/micro_confusion_matrix.png"))
 
 # Display the metrics as a table with three digit precision
 print("\n\033[1mClassification Metrics:\033[1m")
@@ -332,7 +344,7 @@ display(classification_metrics)
 
 #### Computing Major Label Accuracy for Multiclass
 
-Here, we use an example to show the use of these two functions: `map_multiclass_labels` and `calculate_specificity()` to compute major label accuracy for multiclass. Suppose the `few_shot_fault_classification()` function was used to conduct few-shot classification with CLIP, and the result file `results.csv` was saved in the `save_folder`, the folder you decided earlier. Our example includes 225 nominal images and 75 images for each defective class (Band, Bimodal, Single Crystal). The example file `results.csv` can be downloaded [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/usage_examples/results.csv).
+Here, we use an example to show the use of these two functions: `map_multiclass_labels` and `calculate_specificity()` to compute major label accuracy for multiclass. Suppose the `few_shot_fault_classification()` function was used to conduct few-shot classification with CLIP, and the result file `micro_results.csv` was saved in the `save_folder`, the folder you decided earlier. Our example includes 225 nominal images and 75 images for each defective class (Band, Bimodal, Single Crystal) for the automated classification of microstructural material properties across parts. The example file `micro_results.csv` can be downloaded [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/usage_examples/micro_results.csv).
 
 ```python
 import pandas as pd                  # For working with dataframes
@@ -346,9 +358,10 @@ from sklearn.metrics import (        # For evaluating model performance
     precision_score,
     f1_score
 )
+from IPython.display import Image as IPyImage, display, clear_output
 from FewShotIQ.evaluation import map_multiclass_labels, calculate_specificity
 
-classification_results = pd.read_csv(f'{save_folder}/results.csv')
+classification_results = pd.read_csv(f'{save_folder}/micro_results.csv')
 
 # Define the major and sub-labels
 labels = ['Nominal', 'Band', 'Bimodal', 'Single Crystal']
@@ -383,10 +396,10 @@ average_specificity = np.mean(specificity)
 # Plot the confusion matrix
 plt.figure(figsize=(8, 6))
 sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=labels, yticklabels=labels, vmin=0, vmax=225)
-plt.title("Confusion Matrix for Primary Multi-Class Labels for Experiment 05")
+plt.title("Confusion Matrix for Primary Multi-Class Labels")
 plt.xlabel("Predicted Label")
 plt.ylabel("True Label")
-plt.savefig(f"{save_folder}/exp05_confusion_matrix_major_labels.png")
+plt.savefig(f"{save_folder}/micro_confusion_matrix_major_labels.png")
 plt.show()
 
 # Display metrics
@@ -405,7 +418,7 @@ display(classification_metrics)
 
 #### Computing the Per Sub Label Accuracy
 
-Similar to the previous example, we show the use of these two functions: `map_multiclass_labels` and `calculate_specificity()` to compute per sub label accuracy for multiclass. Suppose the `few_shot_fault_classification()` function was used to conduct few-shot classification with CLIP, and the result file `results.csv` was saved in the `save_folder`, the folder you decided earlier. Our example includes 225 nominal images and 25 images for each defective class (Low Band, Medium Band, High Band, Low Bimodal, Medium Bimodal, High Bimodal, Low Single, Medium Single, High Single). Our example file `results.csv` can be downloaded [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/usage_examples/results.csv).
+Similar to the previous example, we show the use of these two functions: `map_multiclass_labels` and `calculate_specificity()` to compute per sub label accuracy for multiclass. Suppose the `few_shot_fault_classification()` function was used to conduct few-shot classification with CLIP, and the result file `micro_results.csv` was saved in the `save_folder`, the folder you decided earlier. Our example includes 225 nominal images and 25 images for each defective class (Low Band, Medium Band, High Band, Low Bimodal, Medium Bimodal, High Bimodal, Low Single, Medium Single, High Single) for the automated classification of microstructural material properties across parts. Our example file `micro_results.csv` can be downloaded [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/usage_examples/micro_results.csv).
 
 
  ```python
@@ -420,9 +433,10 @@ from sklearn.metrics import (        # For evaluating model performance
     precision_score,
     f1_score
 )
+from IPython.display import Image as IPyImage, display, clear_output
 from FewShotIQ.evaluation import map_multiclass_labels, calculate_specificity
 
-classification_results = pd.read_csv(f'{save_folder}/results.csv')
+classification_results = pd.read_csv(f'{save_folder}/micro_results.csv')
 
 # Define the major and sub-labels
 major_labels = ['Nominal', 'Band', 'Bimodal', 'Single']
@@ -469,10 +483,10 @@ average_specificity = np.mean(specificity)
 # Plot the confusion matrix
 plt.figure(figsize=(8, 6))
 sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=labels, yticklabels=labels, vmin=0, vmax=225)
-plt.title("Confusion Matrix for Secondary Multi-Class Labels for Experiment 05")
+plt.title("Confusion Matrix for Secondary Multi-Class Labels")
 plt.xlabel("Predicted Label")
 plt.ylabel("True Label")
-plt.savefig(f"{save_folder}/exp05_confusion_matrix_minor_labels.png")
+plt.savefig(f"{save_folder}/micro_confusion_matrix_minor_labels.png")
 plt.show()
 
 
@@ -498,19 +512,13 @@ In this module, We will introduce several functions for visualzing classificatio
 
 
 ```python
-import os
-from io import BytesIO
+import os                           # To work with file paths and directories
+import random                       # To shuffle or select random items
 import importlib.util
 import subprocess
-import csv
-from urllib.parse import urlparse
-from IPython.display import Image as IPyImage, display, clear_output
-import time
-import json
-import random
 
 # packages that need to be installed in the colab
-packages = ['openai', 'torch', 'pillow', 'requests', 'clip', 'datetime', 'matplotlib', 'pandas', 'sklearn', 'seaborn', 'numpy', 'typing']
+packages = ['openai', 'torch', 'pillow', 'requests', 'clip', 'typing']
 
 # installing the packages if needed
 for package in packages:
@@ -523,25 +531,18 @@ for package in packages:
   else:
     print(f"{package} already installed.")
 
-# importing those packages
-import requests
-from PIL import Image
-import openai
-import clip
-import torch
-import pandas as pd
-import seaborn as sns
-import numpy as np
-
-# importing specific functions/modules from those libraries
-from typing import List, Optional, Union, Any
-from datetime import datetime
+from typing import List, Optional, Dict, Any        # For type annotations
+import openai                                       # To use the OpenAI API
+import clip                                         # For CLIP model loading and preprocessing
+import torch                                        # For tensor operations and checking CUDA availability
+from PIL import Image                               # To handle image loading and manipulation
 import torch.nn.functional as F
-import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 
-# package for importing our hidden key
-openai.api_key = userdata.get('OPENAI_API_KEY') # insert your key here
+import random
+from FewShotIQ.image_utils import get_image_urls, load_image
+
+# package for importing the hidden key
+openai.api_key = 'OPENAI_API_KEY' # insert your key here
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -666,7 +667,7 @@ vary_number_fewshot_examples(
     equal_learn_size=True,
     defect_learn_size=50,  # Ignored if equal_learn_size=True
     save_folder=save_folder,
-    prefix="exp03",  # Prefix for saved CSV and PNG file names
+    prefix="STS",  # Prefix for saved CSV and PNG file names
     labels=["Nominal", "Defective"],  # Labels for classification
     label_counts=[len(test_nominal_images), len(test_defective_images)]  # Number of test samples per class
 )
@@ -686,17 +687,17 @@ import matplotlib.pyplot as plt
 from FewShotIQ.visualization import create_confusion_matrix_gif
 
 create_confusion_matrix_gif(
-    prefix="exp03_conf_matrix",
+    prefix="STS_conf_matrix",
     learn_size=[10, 20, 30, 50, 60, 70, 80, 90, 100, 120, 150, 200, 250, 300, 350],
     duration=3000,
     save_folder=save_folder,
-    file_save_name= "exp03_conf_matrices_all.gif"
+    file_save_name= "STS_conf_matrices_all.gif"
 )
 ```
 
 #### Visualizing the Impact of Learning Size on Classification Metrics
 
-Follow the previous example for applying `vary_number_fewshot_examples{}` function, we preprocesses raw repeated-block data and plots learning size metrics. In the example, the *exp03_aggregated_results.csv* was an output from the `vary_number_fewshot_examples{}` function. One should note that "exp03" is the prefix for saved CSV and PNG file names in this example. Our example *exp03_aggregated_results.csv* can be found [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/usage_examples/exp03_aggregated_results.csv).
+Follow the previous example for applying `vary_number_fewshot_examples{}` function, we preprocesses raw repeated-block data and plots learning size metrics. In the example, the *STS_aggregated_results.csv* was an output from the `vary_number_fewshot_examples{}` function. One should note that "STS" is the prefix for saved CSV and PNG file names in this example. Our example *STS_aggregated_results.csv* can be found [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/usage_examples/STS_aggregated_results.csv).
 
 ```python
 import os
@@ -706,14 +707,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from FewShotIQ.visualization import preprocess_and_plot_learning_size_metrics
 
-raw_results = pd.read_csv(f"{save_folder}/exp03_aggregated_results.csv")
+raw_results = pd.read_csv(f"{save_folder}/STS_aggregated_results.csv")
 preprocess_and_plot_learning_size_metrics(
     raw_data1=raw_results,
     save_folder=save_folder,
-    save_file_name="exp03_learning_size_metrics.png",
+    save_file_name="STS_learning_size_metrics.png",
     y_limits=[0, 1.07],
     label_positions={10, 50, 100, 150, 200, 250, 300, 350},
-    suptitle="Impact of Learning Set Size on Classification Metrics for Experiment 03",
+    suptitle="Impact of Learning Set Size on Classification Metrics",
     figure_size=(15, 10)
 )
 
@@ -721,21 +722,24 @@ preprocess_and_plot_learning_size_metrics(
 
 #### Visualizing the Impact of Model Choice on Classification Metrics
 
-The following code chunk shows an example to use the `preprocess_and_plot_learning_size_metrics()` function to preprocess two raw datasets, which are output files by applying `vary_number_fewshot_examples{}` function using two models individually and plots learning size metrices for both. In the example below, these two models are *ViT-L/14* and *vit-b/32*. One should note that "exp03" is the prefix for saved CSV and PNG file names in this example. The example files *exp03_aggregated_results.csv* can be found [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/usage_examples/exp03_aggregated_results.csv) and *exp03_b32_aggregated_results.csv* can be founded [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/usage_examples/exp03_b32_aggregated_results.csv).
+The following code chunk shows an example to use the `preprocess_and_plot_learning_size_metrics()` function to preprocess two raw datasets, which are output files by applying `vary_number_fewshot_examples{}` function using two models individually and plots learning size metrices for both. In the example below, these two models are *ViT-L/14* and *vit-b/32*. One should note that "STS" is the prefix for saved CSV and PNG file names in this example. The example files *STS_aggregated_results.csv* can be found [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/usage_examples/STS_aggregated_results.csv) and *STS_b32_aggregated_results.csv* can be founded [here](https://raw.githubusercontent.com/Ying-Ju/FewShotIQ/refs/heads/main/usage_examples/STS_b32_aggregated_results.csv).
 
 
 ```python
+import os
+from PIL import Image
+from IPython.display import Image as IPImage, display
 import pandas as pd
 import matplotlib.pyplot as plt
 from FewShotIQ.visualization import preprocess_and_plot_learning_size_metrics
 
-dataset1 = pd.read_csv(f"{save_folder}/exp03_aggregated_results.csv")
-dataset2 = pd.read_csv(f"{save_folder}/exp03_b32_aggregated_results.csv")
+dataset1 = pd.read_csv(f"{save_folder}/STS_aggregated_results.csv")
+dataset2 = pd.read_csv(f"{save_folder}/STS_b32_aggregated_results.csv")
 
 preprocess_and_plot_learning_size_metrics(
     raw_data1=dataset1,
     save_folder=save_folder,
-    save_file_name="exp03_comparing_two_clip_models.png",
+    save_file_name="STS_comparing_two_clip_models.png",
     y_limits=[0, 1.07],
     label_positions={10, 50, 100, 150, 200, 250, 300, 350},
     suptitle="Learning Size Metrics Comparison",
