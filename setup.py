@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="FewShotIQ",               # package name
-    version="0.1.0",                # Initial version
+    version="0.1.1",                # Initial version
     packages=find_packages(exclude=["tests", "tests.*"]),       # Automatically find sub-packages
     include_package_data = False,
     install_requires=[
