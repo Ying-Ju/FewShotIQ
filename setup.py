@@ -4,10 +4,7 @@ setup(
     name="FewShotIQ",               # package name
     version="0.1.0",                # Initial version
     packages=find_packages(),       # Automatically find sub-packages
-    include_package_data = True,
-    package_data ={
-        "FewShotIQ": ["data/**/*"]
-    }, 
+    include_package_data = False,
     install_requires=[
         "openai>=0.27.0",
         "torch>=1.12.0",              # Adjust based on your PyTorch CUDA version

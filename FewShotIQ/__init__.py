@@ -1,5 +1,5 @@
 # Import submodules to expose their functionality
-from .image_utils import get_image_urls, load_package_image, load_image, animate_images
+from .image_utils import get_image_urls, load_image, animate_images
 from .classification import evaluate_zero_shot_predictions, few_shot_fault_classification
 from .evaluation import compute_classification_metrics, map_multiclass_labels, calculate_specificity
 from .visualization import (
@@ -12,7 +12,6 @@ from .visualization import (
 # Define what gets exposed when importing the package
 __all__ = [
     "get_image_urls",
-    "load_package_image", 
     "load_image", 
     "animate_images",
     "evaluate_zero_shot_predictions", 

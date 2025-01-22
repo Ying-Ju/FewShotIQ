@@ -24,9 +24,6 @@ This module provides functions to handle images, such as loading, animating, and
 - `animate_images(...)`
     Creates side-by-side animations of nominal and defective images. Optionally saves the animation as a GIF.
 
-- `load_package_image(image_path: str)`
-    Loads an image from the package's data directory.
-
 
 `classification` Module
 Perform zero-shot and few-shot classification with pre-trained models.
@@ -67,14 +64,6 @@ Preprocesses one or two raw repeated-block datasets and plots learning size metr
 ## Detailed Usage Examples
 
 ### `image_utils` Module
-#### Load an image from the package's data folder
-
-```python
-from FewShotIQ.image_utils import load_package_image
-
-image = load_package_image("pan_images/test/defective/IMG_1514.JPG")
-image.show()
-```
 
 #### Loading Images 
 

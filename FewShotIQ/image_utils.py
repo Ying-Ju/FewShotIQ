@@ -58,37 +58,6 @@ def get_image_urls(
     return image_urls
 
 
-def load_package_image(image_path):
-    """
-    Load an image from the package's data folder.
-
-    Parameters:
-    - image_path (str): Relative path (including subdirectories) to the image file.
-
-    Returns:
-    - Image.Image: Loaded PIL Image object.
-    """
-    # Split directory and file name
-    image = os.path.split(image_path)
-    directory = image[0]  # Subdirectory (if any)
-    file_name = image[1]  # File name only
-
-    # Normalize the directory to use the OS-specific separator
-    normalized_directory = os.path.normpath(directory)
-    
-    # Replace OS separators with dots for Python module paths
-    module_path = f"FewShotIQ.data.{normalized_directory.replace(os.sep, '.')}" if directory else "FewShotIQ.data"
-
-    # Access the file using importlib.resources.files
-    package_files = pkg_resources.files(module_path)
-    img_path = package_files / file_name
-
-    # Open the image
-    if not img_path.is_file():
-        raise FileNotFoundError(f"File '{image_path}' not found in package data.")
-    return Image.open(img_path)
-
-
 def load_image(image_path_or_url: str, mode: str = "RGB") -> Image.Image:
     """
     Load an image from a local file path or a URL.

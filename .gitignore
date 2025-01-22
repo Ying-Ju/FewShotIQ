@@ -1,4 +1,10 @@
+*.Log
+.DS_Store
 *.pyc
 __pycache__/
 .vscode/
 env/
+.pyo
+build/
+dist/
+
