@@ -3,5 +3,5 @@ exclude tests/*
 exclude tests/*.py
 include LICENSE
 include README.md
-include usage_guide.md
+include docs/usage_guide.md
 recursive-include FewShotIQ *.py

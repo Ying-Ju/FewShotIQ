@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 # Read the README.md file
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
-    
+
 setup(
     name="FewShotIQ",               # package name
     version="0.1.0",                # Initial version
@@ -21,9 +21,6 @@ setup(
         "scikit-learn>=0.24.0",
         "textwrap3>=0.9.2",
     ],
-    extras_require={
-        "clip": ["clip @ git+https://github.com/openai/CLIP.git"],  # Optional for CLIP
-    },
     python_requires=">=3.10",        # Minimum Python version required
     description="FewShotIQ: Few-Shot Image Quality Inspection and Quantification",
     long_description=long_description,  # Include README.md as long_description
